@@ -129,6 +129,10 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
     }
     this.isStopped = true;
     super.unsubscribe();
+
+    if (this.destination instanceof SafeSubscriber) {
+        (<SafeSubscriber<T>>this.destination).unsubscribeFix();
+    }
   }
 
   protected _next(value: T): void {
@@ -273,6 +277,15 @@ class SafeSubscriber<T> extends Subscriber<T> {
     const { _parentSubscriber } = this;
     this._context = null;
     this._parentSubscriber = null;
+    _parentSubscriber.unsubscribe();
+  }
+
+  public unsubscribeFix(): void {
+    const _parentSubscriber = this;
+    this._context = null;
+    this._parentSubscriber = null;
+    this.isStopped = true;
+    this.closed = true;
     _parentSubscriber.unsubscribe();
   }
 }

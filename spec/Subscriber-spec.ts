@@ -113,3 +113,22 @@ describe('Subscriber', () => {
     expect(argument).to.have.lengthOf(0);
   });
 });
+
+it('upon subscription, the destination SafeSubscriber should be unsubscribed too', () => {
+    const observer = {
+        next: function () { /*noop*/ },
+        error: function (e) { throw e; }
+    };
+
+    const sub = new Subscriber(observer);
+
+    const destination = sub['destination'];
+    const destUnsubscribe = destination['unsubscribe'] = sinon.spy();
+    const destUnsubscribeProtected = destination['_unsubscribe'] = sinon.spy();
+
+    expect(sub.closed).to.eq(true);
+    expect(destination.closed).to.eq(true);
+
+    expect(destUnsubscribe).have.been.called;
+    expect(destUnsubscribeProtected).have.been.called;
+});
