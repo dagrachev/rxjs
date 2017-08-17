@@ -120,6 +120,9 @@ var Subscriber = (function (_super) {
         }
         this.isStopped = true;
         _super.prototype.unsubscribe.call(this);
+        if (this.destination instanceof SafeSubscriber) {
+            this.destination.unsubscribeFix();
+        }
     };
     Subscriber.prototype._next = function (value) {
         this.destination.next(value);
@@ -257,6 +260,14 @@ var SafeSubscriber = (function (_super) {
         var _parentSubscriber = this._parentSubscriber;
         this._context = null;
         this._parentSubscriber = null;
+        _parentSubscriber.unsubscribe();
+    };
+    SafeSubscriber.prototype.unsubscribeFix = function () {
+        var _parentSubscriber = this;
+        this._context = null;
+        this._parentSubscriber = null;
+        this.isStopped = true;
+        this.closed = true;
         _parentSubscriber.unsubscribe();
     };
     return SafeSubscriber;
